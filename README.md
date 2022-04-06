@@ -32,3 +32,75 @@
 В диалоговом окне представлены вкладки: Command output - вывод последней выполненной команды, Nmap - результат выполнения сканирования портов и Print - интерфейс "отпечатков" хоста. Отпечаток - это совокупность сведений о хосте, полученных в результате сканирования, по ним система определяет изменения в конфигурации. Отпечатки накапливаются в базе данных и служат для детального анализа истории изменений и поиска совпадений. В правом верхнем углу диалогового окна присутствуют кнопки запуска команд сканирования хоста - nmap, nbtscan, ping, arping.
 
 Пуск/останов режима анализа сетевой активности в сегменте осуществляется с помощью кнопки "►" вкладки Netdiscover. Все обнаруженные незарегистрированные хосты будут автоматически добавлены в начало основной таблицы и отмечены красным фильтром. Подробный вывод команды netdiscover будет представлен в соответствующем поле этой вкладки.
+
+### Установка и настройка
+Для развертывания системы рекомендуется использовать свежий дистрибутив Kali Linux или любой другой дистрибутив Linux/BSD. Ниже будут представлены инструкции по установке для Debian-based дистрибутивов.
+
+1. Развертывание веб-сервера Apache2 (или любого другого веб-сервера с поддержкой CGI) согласно официальной инструкции поставщика. Необходимо ограничить доступ к веб-серверу извне и подключить обработчик Perl. Ниже представлен пример конфигурации виртуального хоста для Apache2: 
+``` 
+<VirtualHost *:80>
+	ServerName radar
+
+	ServerAdmin webmaster@radar
+	DocumentRoot /var/www/html
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	ScriptAlias /cgi-bin/ "var/www/html/ids/cgi-bin"
+	
+	<Directory /var/www/html/>
+	    AuthType Basic
+	    AuthName "Radar"
+	    AuthBasicProvider file
+	    AuthUserFile "/etc/apache2/passwords"
+	    Require user admin
+	</Directory>
+
+	<Directory /var/www/html/ids/cgi-bin>
+	    Require ip 192.168.0.55 
+	    AllowOverride None
+	    Options +ExecCGI -Includes
+	    AddHandler cgi-script .cgi .pl .pm
+	</Directory>
+</VirtualHost>
+```
+
+2. Установка необходимых пакетов: ` apt-get update && apt-get install iputils-ping arping nbtscan nmap netdiscover `
+
+3. Необходимо задать разрешения для учетной записи веб-сервера для запуска системных утилит в файле /etc/sudoers:
+```
+www-data	ALL = (root) NOPASSWD:/usr/bin/arping,/usr/bin/nbtscan,/var/www/html/ids/cgi-bin/ndstart.sh,/var/www/html/ids/cgi-bin/ndstop.sh,/var/www/html/ids/cgi-bin/ndstat.sh,/usr/bin/nmap
+```
+4. Развертывание СУБД MariaDB (MySQL) согласно официальной инструкции поставщика.
+
+5. Создание структуры таблиц СУБД:
+```
+CREATE TABLE `main` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(15) NOT NULL,
+  `mac` varchar(17) DEFAULT '',
+  `nbname` varchar(250) DEFAULT '',
+  `description` varchar(250) DEFAULT '',
+  `iface` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5174 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `prints` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ipid` int(11) DEFAULT NULL,
+  `print` text DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=950 DEFAULT CHARSET=utf8;
+```
+
+6. Создание первоначальных данных о хостах может производиться добавлением строк в таблицу main вручную либо импортом из CSV-файла с помощью скрипта ids/cgi-bin/filldb.pl. Ниже приведен пример содержимого файла CSV:
+```
+00:1E:67:AE:9C:A6;192.168.0.1;server1;;
+F4:6D:04:D4:72:CA;192.168.0.2;server2;;
+00:1e:58:9a:24:94;192.168.0.3;router;;
+00:19:DB:DC:C8:F1;192.168.0.7;computer1;Рабочая станция;;
+```
+Перед запуском скрипта необходимо открыть его в текстовом редакторе и подставить имя файла для импорта (по умолчанию - 0.csv) и интерфейс (по умолчанию -  eth0).
+
+
+
