@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<title>Intrusion Detection System</title>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="css/common.css"/>
+<!--<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">-->
+<body>
+<script src="js/jquery-1.10.2.js"></script>
+<script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<script src="js/index.js"></script>
+<h1>Intrusion Detection System</h1>
+<div id="container">
+<ul>
+	<li><a href="#main">List</a></li>
+	<li><a href="#netdiscover">Netdiscover</a></li>
+	<li><a href="#log">Log</a></li>
+</ul>
+<div id="main">
+	<div id="filter">
+		<div id="mainwatch">Â</div>
+		<select id="iface" name="iface">
+			<option value="eth0">eth0</option>
+			<option value="eth1">eth1</option>
+		</select>
+		<input type="checkbox" value="blank" checked name="blank"></input>
+		<input type="checkbox" value="norespond" checked name="norespond"></input>
+		<input type="checkbox" value="loss" checked name="loss"></input>
+		<input type="checkbox" value="warning" checked name="warning"></input>
+	</div>
+	<div id="iplist"></div>
+	<div id="details">
+		<div id="buttons"><button id="nmap">nmap</button><button id="nbtscan">nbtscan</button><button id="ping">ping</button><button id="arping">arping</button></div>
+		<div id="outputs">
+			<ul>
+				<li><a href="#output">Command output</a></li>
+				<li><a href="#nm_output">Nmap</a></li>
+				<li><a href="#p_output">Print</a></li>
+			</ul>
+			<div id="output"><textarea readonly id="ping_output"></textarea></div>
+			<div id="nm_output"><textarea readonly id="nmap_output"></textarea></div>
+			<div id="p_output"><div class="control"><span id="print_prev">◄ prev</span><span id="print_next">next ►</span><span id="print_alike">alike</span></div><textarea readonly id="print_output"></textarea></div>
+		</div>
+	</div>
+</div>
+
+<div id="netdiscover">
+	<div class="control"><span id="ndstart">►</span><span id="ndstatus">not running</span></div>
+	<textarea></textarea>
+</div>
+<div id="log">
+	<textarea></textarea>
+</div>
+</div>
+</body>
+</html>
