@@ -102,5 +102,46 @@ F4:6D:04:D4:72:CA;192.168.0.2;server2;;
 ```
 Перед запуском скрипта необходимо открыть его в текстовом редакторе и подставить имя файла для импорта (по умолчанию - 0.csv) и интерфейс (по умолчанию -  eth0).
 
+7. Копирование содержимого репозитория в каталог веб-сервера:
+```
+cp -r ids /var/www/html/
+```
 
+### Устранение неполадок
 
+Проверка работоспособности веб-сервера производится путем обращения к странице http://radar/ids/cgi-bin/env.pl Если настройка произведена корректно, ответ будет содержать вывод следующего содержания:
+```
+SERVER_ADMIN => webmaster@radar
+SCRIPT_NAME => /ids/cgi-bin/env.pl
+CONTEXT_PREFIX =>
+QUERY_STRING =>
+SERVER_PORT => 80
+SERVER_ADDR => 192.168.0.54
+REMOTE_PORT => 50299
+PATH => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HTTP_USER_AGENT => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36
+GATEWAY_INTERFACE => CGI/1.1
+SCRIPT_FILENAME => /var/www/html/ids/cgi-bin/env.pl
+REQUEST_METHOD => GET
+HTTP_UPGRADE_INSECURE_REQUESTS => 1
+CONTEXT_DOCUMENT_ROOT => /var/www/html
+HTTP_CONNECTION => keep-alive
+HTTP_ACCEPT_LANGUAGE => ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7
+DOCUMENT_ROOT => /var/www/html
+HTTP_ACCEPT => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+HTTP_ACCEPT_ENCODING => gzip, deflate
+REQUEST_SCHEME => http
+REQUEST_URI => /ids/cgi-bin/env.pl
+SERVER_SOFTWARE => Apache/2.4.25 (Debian)
+REMOTE_ADDR => 192.168.0.55
+SERVER_PROTOCOL => HTTP/1.1
+HTTP_HOST => radar
+SERVER_NAME => radar
+SERVER_SIGNATURE =>
+Apache/2.4.25 (Debian) Server at radar Port 80
+```
+
+Установка имени хоста сервера осуществляется с помощью команды `hostname -b radar` (необязательно).
+Перезапуск веб-сервера осуществляется командой `systemctl restart apache2`.
+Перезапуск службы СУБД осуществляется аналогично `systemctl restart mariadb`.
+Отладочная информация доступна в журнале системы `journalctl -r` и логах веб-сервера /var/log/apache2.
